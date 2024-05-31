@@ -32,10 +32,12 @@ jobs:
           matching_dirs=()
           for dir in $(echo "$dirs" | tr '\n' ' '); do
             echo "Checking $dir"
+            set +e
             if [ -f "$dir/kcl.mod" ] && [ -d "$dir/src" ]; then
               echo "Found $dir"
               matching_dirs+=("$dir")
             fi
+            set -e
           done
           echo "Matched directories: ${matching_dirs[@]}"
           echo "dirs=$matching_dirs" >> $GITHUB_OUTPUT
