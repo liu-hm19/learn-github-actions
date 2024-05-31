@@ -29,7 +29,7 @@ jobs:
           # Find directories containing kcl.mod and src folder
           dirs=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | awk -F'/' '{print $1}' | sort -u | uniq)
           matching_dirs=()
-          for dir in $(echo "$dirs" | tr '\n'''); do
+          for dir in $(echo "$dirs" | tr '\n' ' '); do
             if [ -f "$dir/kcl.mod" ] && [ -d "$dir/src" ]; then
               matching_dirs+=($dir)
             fi
