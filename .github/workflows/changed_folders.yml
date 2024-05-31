@@ -32,15 +32,9 @@ jobs:
           matching_dirs=()
           for dir in $(echo "$dirs" | tr '\n' ' '); do
             echo "Checking $dir"
-            # if [ -f "$dir/kcl.mod" ] && [ -d "$dir/src" ]; then
-            #   echo "Found $dir"
-            #   matching_dirs+=($dir)
-            if [ if "$dir/kcl.mod" ]; then
-              echo "Found $dir/kcl.mod"
-              if [ -d "$dir/src" ]; then 
-                echo "Found $dir/src"
-                matching_dirs+=($dir)
-              fi
+            if [ -f "$dir/kcl.mod" ] && [ -d "$dir/src" ]; then
+              echo "Found $dir"
+              matching_dirs+=("$dir")
             fi
           done
           echo "Matched directories: ${matching_dirs[@]}"
