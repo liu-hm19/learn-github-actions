@@ -1,0 +1,36 @@
+name: Get Changed Folders
+
+on: 
+  push: 
+    branches:
+      - main
+  pull_request:
+    branches: 
+      - main
+
+jobs:
+  get_changed_folders: 
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get changed files
+        run: |
+          changed_files=$(git diff-tree --no-commit --name-only -r ${{ github.event.head_commit.id }})
+          # echo "::set-output name=changed_files::$changed_files"
+          echo "changed_files=$changed_files" >> $GITHUB_OUTPUT
+
+      - name: Find directories with kcl.mod and src
+        run: | 
+          # Find directories containing kcl.mod and src folder
+          dirs=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | awk -F'/' '{print $1}' | sort -u | uniq)
+          matching_dirs=()
+          for dir in $dirs; do
+            if [ -f "$dir/kcl.mod" ] && [ -d "$dir/src" ]; then
+              matching_dirs+=($dir)
+            fi
+          done
+          echo "Matched directories: ${matching_dirs[@]}"
+          echo "dirs=$matching_dirs" >> $GITHUB_OUTPUT
