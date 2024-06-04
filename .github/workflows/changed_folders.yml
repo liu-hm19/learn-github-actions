@@ -1,93 +1,59 @@
-# name: Get Changed Folders
+name: Get Changed Folders
 
-# on: 
-#   push: 
-#     branches:
-#       - main
-#   pull_request:
-#     branches: 
-#       - main
-
-# jobs:
-#   get_changed_folders: 
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v4
-#         with:
-#           fetch-depth: 0
-
-#       - name: Find directories with kcl.mod and src
-#         id: find_dirs
-#         run: | 
-#           # Find directories containing kcl.mod and src folder
-#           dirs=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | awk -F'/' '{print $1}' | sort -u | uniq)
-#           tree .
-#           matching_dirs=()
-#           for dir in $(echo "$dirs" | tr '\n' ' '); do
-#             echo "Checking $dir"
-#             set +e
-#             if [ -f "$dir/kcl.mod" ] && [ -d "$dir/src" ]; then
-#               echo "Found $dir"
-#               matching_dirs+=("$dir")
-#             fi
-#             set -e
-#           done
-#           echo "Matched directories: ${matching_dirs[@]}"
-#           echo "changed_dirs=$matching_dirs" >> "$GITHUB_OUTPUT"
-
-#   push_module: 
-#     needs: [get_changed_folders]
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v4
-#         with:
-#           fetch-depth: 0
-
-#       - name: Test echo GitHub Actions secrets
-#         env: 
-#           ACTIONS_SECRETS_TEST: '${{ secrets.ACTIONS_SECRETS_TEST }}'
-
-#         run: |
-#           dirs_changed="${{ needs.get_changed_folders.outputs.changed_dirs }}"
-#           echo "Changed directories from get_changed_folders: ${dirs_changed[@]}"
-#           echo "$ACTIONS_SECRETS_TEST"
-
-on: push
+on: 
+  push: 
+    branches:
+      - main
+  pull_request:
+    branches: 
+      - main
 
 jobs:
-  secret-generator:
+  get_changed_folders: 
     runs-on: ubuntu-latest
-    outputs:
-      handle: ${{ steps.generate-secret.outputs.handle }}
+    outputs: 
+      changed_dirs: ${{ steps.find_dirs.outputs.changed_dirs }}
+
     steps:
-    - uses: some/secret-store@v1
-      with:
-        credentials: ${{ secrets.SECRET_STORE_CREDENTIALS }}
-        instance: ${{ secrets.SECRET_STORE_INSTANCE }}
-    - name: generate secret
-      id: generate-secret
-      shell: bash
-      run: |
-        GENERATED_SECRET=$((RANDOM))
-        echo "::add-mask::$GENERATED_SECRET"
-        SECRET_HANDLE=$(secret-store store-secret "$GENERATED_SECRET")
-        echo "handle=$SECRET_HANDLE" >> "$GITHUB_OUTPUT"
-  secret-consumer:
-    runs-on: macos-latest
-    needs: secret-generator
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find directories with kcl.mod and src
+        id: find_dirs
+        run: | 
+          # Find directories containing kcl.mod and src folder
+          dirs=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | awk -F'/' '{print $1}' | sort -u | uniq)
+          tree .
+          matching_dirs=()
+          for dir in $(echo "$dirs" | tr '\n' ' '); do
+            echo "Checking $dir"
+            set +e
+            if [ -f "$dir/kcl.mod" ] && [ -d "$dir/src" ]; then
+              echo "Found $dir"
+              matching_dirs+=("$dir")
+            fi
+            set -e
+          done
+          echo "Matched directories: ${matching_dirs[@]}"
+          echo "changed_dirs=$matching_dirs" >> "$GITHUB_OUTPUT"
+
+  push_module: 
+    needs: [get_changed_folders]
+    runs-on: ubuntu-latest
+
     steps:
-    - uses: some/secret-store@v1
-      with:
-        credentials: ${{ secrets.SECRET_STORE_CREDENTIALS }}
-        instance: ${{ secrets.SECRET_STORE_INSTANCE }}
-    - name: use secret
-      shell: bash
-      run: |
-        SECRET_HANDLE="${{ needs.secret-generator.outputs.handle }}"
-        RETRIEVED_SECRET=$(secret-store retrieve-secret "$SECRET_HANDLE")
-        echo "::add-mask::$RETRIEVED_SECRET"
-        echo "We retrieved our masked secret: $RETRIEVED_SECRET"
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Test echo GitHub Actions secrets
+        env: 
+          ACTIONS_SECRETS_TEST: '${{ secrets.ACTIONS_SECRETS_TEST }}'
+
+        run: |
+          dirs_changed="${{ needs.get_changed_folders.outputs.changed_dirs }}"
+          echo "Changed directories from get_changed_folders: ${dirs_changed[@]}"
+          echo "$ACTIONS_SECRETS_TEST"
