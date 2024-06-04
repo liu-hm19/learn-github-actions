@@ -47,6 +47,8 @@ jobs:
           fetch-depth: 0
 
       - name: Test echo GitHub Actions secrets
+        env: 
+          ACTIONS_SECRETS_TEST: ${{ secrets.ACTIONS_SECRETS_TEST }}
         run: |
-          echo "Changed directories from get_changed_folders: ${{ needs.get_changed_folders.outputs.changed_dirs }}"
+          echo "Changed directories from get_changed_folders: ${{ needs.get_changed_folders.outputs.changed_dirs[@] }}"
           echo "GitHub Actions Secrets Test: $ACTIONS_SECRETS_TEST"
