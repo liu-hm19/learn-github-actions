@@ -19,6 +19,7 @@ jobs:
           fetch-depth: 0
 
       - name: Find directories with kcl.mod and src
+        id: find_dirs
         run: | 
           # Find directories containing kcl.mod and src folder
           dirs=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | awk -F'/' '{print $1}' | sort -u | uniq)
@@ -51,6 +52,6 @@ jobs:
           ACTIONS_SECRETS_TEST: '${{ secrets.ACTIONS_SECRETS_TEST }}'
 
         run: |
-          changed_dirs='${{ needs.get_changed_folders.outputs.changed_dirs }}'
+          changed_dirs='${{ needs.get_changed_folders.find_dirs.outputs.changed_dirs }}'
           echo "Changed directories from get_changed_folders: ${changed_dirs[@]}"
           echo "$ACTIONS_SECRETS_TEST"
