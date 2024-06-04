@@ -34,7 +34,7 @@ jobs:
             set -e
           done
           echo "Matched directories: ${matching_dirs[@]}"
-          echo "changed_dirs=$matching_dirs" >> $GITHUB_OUTPUT
+          echo "changed_dirs=$matching_dirs" >> "$GITHUB_OUTPUT"
 
   push_module: 
     needs: [get_changed_folders]
@@ -47,7 +47,7 @@ jobs:
           fetch-depth: 0
 
       - name: Test echo GitHub Actions secrets
-        env: 
+        with: 
           ACTIONS_SECRETS_TEST: ${{ secrets.ACTIONS_SECRETS_TEST }}
         run: |
           echo "Changed directories from get_changed_folders: ${{ needs.get_changed_folders.outputs.changed_dirs }}"
