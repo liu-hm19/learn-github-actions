@@ -59,6 +59,7 @@ jobs:
         run: |
           dirs_changed="${{ needs.get_changed_folders.outputs.changed_dirs }}"
           echo "Changed directories from get_changed_folders: ${dirs_changed[@]}"
+          source "$HOME/.kusion/.env"
           for dir in ${dirs_changed[@]}; do
             cd $dir
             kusion mod push . oci://ghcr.io/liu-hm19 --os-arch=darwin/amd64 --creds $PACKAGE_TOKEN --latest=false
