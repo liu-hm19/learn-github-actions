@@ -37,7 +37,7 @@ jobs:
             set -e
           done
           echo "Matched directories: ${matching_dirs[@]}"
-          echo "changed_dirs=$matching_dirs" >> "$GITHUB_OUTPUT"
+          echo "changed_dirs=${matching_dirs[@]}" >> "$GITHUB_OUTPUT"
 
   push_module: 
     needs: [get_changed_folders]
