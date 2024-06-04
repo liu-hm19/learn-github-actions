@@ -52,6 +52,6 @@ jobs:
           ACTIONS_SECRETS_TEST: '${{ secrets.ACTIONS_SECRETS_TEST }}'
 
         run: |
-          changed_dirs='${{ needs.get_changed_folders.find_dirs.outputs.changed_dirs }}'
-          echo "Changed directories from get_changed_folders: ${changed_dirs[@]}"
+          dirs_changed="${{ needs.get_changed_folders.outputs.changed_dirs }}"
+          echo "Changed directories from get_changed_folders: ${dirs_changed[@]}"
           echo "$ACTIONS_SECRETS_TEST"
