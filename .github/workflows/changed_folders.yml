@@ -18,12 +18,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      # - name: Get changed files
-      #   run: |
-      #     changed_files=$(git diff-tree --no-commit --name-only -r ${{ github.event.head_commit.id }})
-      #     # echo "::set-output name=changed_files::$changed_files"
-      #     echo "changed_files=$changed_files" >> $GITHUB_OUTPUT
-
       - name: Find directories with kcl.mod and src
         run: | 
           # Find directories containing kcl.mod and src folder
@@ -40,4 +34,19 @@ jobs:
             set -e
           done
           echo "Matched directories: ${matching_dirs[@]}"
-          echo "dirs=$matching_dirs" >> $GITHUB_OUTPUT
+          echo "changed_dirs=$matching_dirs" >> $GITHUB_OUTPUT
+
+  push_module: 
+    needs: [get_changed_folders]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Test echo GitHub Actions secrets
+        run: |
+          echo "Changed directories from get_changed_folders: ${{ needs.get_changed_folders.outputs.changed_dirs }}"
+          echo "GitHub Actions Secrets Test: $ACTIONS_SECRETS_TEST"
