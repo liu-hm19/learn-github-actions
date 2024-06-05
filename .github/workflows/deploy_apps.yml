@@ -71,8 +71,19 @@ jobs:
           # execute python script for previewing
           python3 hack/preview_changed_stacks.py
       - name: Upload report
+        id: upload-report
         if: ${{ steps.preview.outputs.preview_success == 'true' }}
         uses: actions/upload-artifact@v3
         with:
           name: preview-report
           path: hack/report/preview-result.zip
+      - name: Approve preview
+        if: ${{ steps.preview.outputs.preview_success == 'true' }}
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.PACKAGE_TOKEN }}
+          approvers: ${{ github.event.pull_request.user.login }}
+          minimum-approvals: 1
+          issue-title: "Deploying ${{ needs.get-changed-project-stack.outputs.changed_stacks }}"
+          issue-body: "Please check the preview report at: ${{ steps.upload-report.outputs.artifact-url }}"
+          
