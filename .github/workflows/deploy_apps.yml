@@ -28,7 +28,7 @@ jobs:
           CHANGED_PATHS: ${{ steps.git-diff.outputs.diff }}
         run: |
           export CHANGED_PATHS="${{ steps.git-diff.outputs.diff }}"
-          python3 hack/get_changed_project_and_stack.py
+          python3 hack/get_changed_projects_and_stacks.py
       - name: Print Changed Projects and Stacks
         run: |
           echo "Changed projects: ${{ steps.get-changed-projects-and-stacks.outputs.changed_projects }}"
@@ -36,4 +36,3 @@ jobs:
     outputs: 
       changed_projects: ${{ steps.get-changed-projects-and-stacks.outputs.changed_projects }}
       changed_stacks: ${{ steps.get-changed-projects-and-stacks.outputs.changed_stacks }}
-      

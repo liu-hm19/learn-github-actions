@@ -1,66 +1,66 @@
-name: Get Changed Folders
+# name: Get Changed Folders
 
-on: 
-  push: 
-    branches:
-      - main
-  pull_request:
-    branches: 
-      - main
+# on: 
+#   push: 
+#     branches:
+#       - main
+#   pull_request:
+#     branches: 
+#       - main
 
-jobs:
-  get_changed_folders: 
-    runs-on: ubuntu-latest
-    outputs: 
-      changed_dirs: ${{ steps.find_dirs.outputs.changed_dirs }}
+# jobs:
+#   get_changed_folders: 
+#     runs-on: ubuntu-latest
+#     outputs: 
+#       changed_dirs: ${{ steps.find_dirs.outputs.changed_dirs }}
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
 
-      - name: Find directories with kcl.mod and src
-        id: find_dirs
-        run: | 
-          # Find directories containing kcl.mod and src folder
-          dirs=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | awk -F'/' '{print $1}' | sort -u | uniq)
-          tree .
-          matching_dirs=()
-          for dir in $(echo "$dirs" | tr '\n' ' '); do
-            echo "Checking $dir"
-            set +e
-            if [ -f "$dir/kcl.mod" ] && [ -d "$dir/src" ]; then
-              echo "Found $dir"
-              matching_dirs+=("$dir")
-            fi
-            set -e
-          done
-          echo "Matched directories: ${matching_dirs[@]}"
-          echo "changed_dirs=${matching_dirs[@]}" >> "$GITHUB_OUTPUT"
+#       - name: Find directories with kcl.mod and src
+#         id: find_dirs
+#         run: | 
+#           # Find directories containing kcl.mod and src folder
+#           dirs=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | awk -F'/' '{print $1}' | sort -u | uniq)
+#           tree .
+#           matching_dirs=()
+#           for dir in $(echo "$dirs" | tr '\n' ' '); do
+#             echo "Checking $dir"
+#             set +e
+#             if [ -f "$dir/kcl.mod" ] && [ -d "$dir/src" ]; then
+#               echo "Found $dir"
+#               matching_dirs+=("$dir")
+#             fi
+#             set -e
+#           done
+#           echo "Matched directories: ${matching_dirs[@]}"
+#           echo "changed_dirs=${matching_dirs[@]}" >> "$GITHUB_OUTPUT"
 
-  push_module: 
-    needs: [get_changed_folders]
-    runs-on: ubuntu-latest
+#   push_module: 
+#     needs: [get_changed_folders]
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
 
-      - name: Install Kusion CLI
-        run: curl https://www.kusionstack.io/scripts/install.sh | sh -s 0.12.0-rc.1
+#       - name: Install Kusion CLI
+#         run: curl https://www.kusionstack.io/scripts/install.sh | sh -s 0.12.0-rc.1
 
-      - name: Test echo GitHub Actions secrets
-        env: 
-          PACKAGE_TOKEN: '${{ secrets.PACKAGE_TOKEN }}'
+#       - name: Test echo GitHub Actions secrets
+#         env: 
+#           PACKAGE_TOKEN: '${{ secrets.PACKAGE_TOKEN }}'
 
-        run: |
-          dirs_changed="${{ needs.get_changed_folders.outputs.changed_dirs }}"
-          echo "Changed directories from get_changed_folders: ${dirs_changed[@]}"
-          source "$HOME/.kusion/.env"
-          for dir in ${dirs_changed[@]}; do
-            cd $dir
-            kusion mod push . oci://ghcr.io/liu-hm19 --os-arch=darwin/amd64 --creds $PACKAGE_TOKEN --latest=false
-          done
+#         run: |
+#           dirs_changed="${{ needs.get_changed_folders.outputs.changed_dirs }}"
+#           echo "Changed directories from get_changed_folders: ${dirs_changed[@]}"
+#           source "$HOME/.kusion/.env"
+#           for dir in ${dirs_changed[@]}; do
+#             cd $dir
+#             kusion mod push . oci://ghcr.io/liu-hm19 --os-arch=darwin/amd64 --creds $PACKAGE_TOKEN --latest=false
+#           done
