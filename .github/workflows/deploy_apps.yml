@@ -51,6 +51,8 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.9
+      - name: Install Pytest Html
+        run: python3 -m pip install pytest-html pyyaml -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
       - name: Setup K3d&K3s
         uses: nolar/setup-k3d-k3s@v1
       - name: Preview
@@ -74,4 +76,3 @@ jobs:
         with:
           name: preview-report
           path: hack/report/preview-result.zip
-          
