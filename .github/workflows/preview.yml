@@ -1,8 +1,8 @@
-name: Deploy
+name: Preview
 
 on: 
-  push:
-    branches:
+  pull_request: 
+    branches: 
       - "main"
 
 jobs:
@@ -37,7 +37,7 @@ jobs:
       changed_projects: ${{ steps.get-changed-projects-and-stacks.outputs.changed_projects }}
       changed_stacks: ${{ steps.get-changed-projects-and-stacks.outputs.changed_stacks }}
 
-  apply: 
+  preview: 
     needs: [ get-changed-project-stack ]
     runs-on: ubuntu-latest
     steps:
@@ -55,8 +55,8 @@ jobs:
         run: python3 -m pip install pytest-html pyyaml -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
       - name: Setup K3d&K3s
         uses: nolar/setup-k3d-k3s@v1
-      - name: Apply
-        id: apply
+      - name: Preview
+        id: preview
         env: 
           CHANGED_STACKS: ${{ needs.get-changed-project-stack.outputs.changed_stacks }}
           OSS_ACCESS_KEY_ID: '${{ secrets.OSS_ACCESS_KEY_ID }}'
@@ -68,16 +68,26 @@ jobs:
           # setup remote backend for kusion cli
           kusion config set backends.oss_test '{"type":"oss","configs":{"bucket":"kusion-test","endpoint":"oss-cn-shanghai.aliyuncs.com"}}'
           kusion config set backends.current oss_test
-          # execute python script for applying
-          python3 hack/apply_changed_stacks.py
+          # execute python script for previewing
+          python3 hack/preview_changed_stacks.py
       - name: Upload report
         id: upload-report
-        if: ${{ steps.apply.outputs.apply_success == 'true' }}
+        if: ${{ steps.preview.outputs.preview_success == 'true' }}
         uses: actions/upload-artifact@v4
         with:
-          name: apply-report
-          path: hack/report/apply-result.zip
+          name: preview-report
+          path: hack/report/preview-result.zip
+        
       - name: Echo URL 
-        if: ${{ steps.apply.outputs.apply_success == 'true' }}
-        run: |
-          echo "Please check the apply result at: ${{ steps.upload-report.outputs.artifact-url }}"
+        if: ${{ steps.preview.outputs.preview_success == 'true' }}
+        run: echo "${{ steps.upload-report.outputs.artifact-url }}"
+
+      - name: Approve preview
+        if: ${{ steps.preview.outputs.preview_success == 'true' }}
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.PACKAGE_TOKEN }}
+          approvers: ${{ github.event.pull_request.user.login }}
+          minimum-approvals: 1
+          issue-title: "Deploying ${{ needs.get-changed-project-stack.outputs.changed_stacks }}"
+          issue-body: "Please check the preview report at: ${{ steps.upload-report.outputs.artifact-url }}"
