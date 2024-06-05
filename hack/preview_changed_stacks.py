@@ -62,7 +62,7 @@ def pack_result_files():
 
 
 stack_dirs = util.get_changed_stacks()
-util.create_workspaces(stack_dirs)
+# util.create_workspaces(stack_dirs)
 success = preview_stacks(stack_dirs)
 if success:
     pack_result_files()
