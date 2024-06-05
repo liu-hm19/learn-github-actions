@@ -65,6 +65,13 @@ jobs:
           source "$HOME/.kusion/.env"
           # setup remote backend for kusion cli
           kusion config set backends.oss_test '{"type":"oss","configs":{"bucket":"kusion-test","endpoint":"oss-cn-shanghai.aliyuncs.com"}}'
+          kusion config set backends.current oss_test
           # execute python script for previewing
           python3 hack/preview_changed_stacks.py
+      - name: Upload report
+        if: ${{ steps.preview.outputs.preview_success == 'true' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: preview-report
+          path: hack/report/preview-result.zip
           
