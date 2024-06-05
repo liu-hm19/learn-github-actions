@@ -36,3 +36,35 @@ jobs:
     outputs: 
       changed_projects: ${{ steps.get-changed-projects-and-stacks.outputs.changed_projects }}
       changed_stacks: ${{ steps.get-changed-projects-and-stacks.outputs.changed_stacks }}
+
+  preview: 
+    needs: [ get-changed-project-stack ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Kusion 
+        run: curl https://www.kusionstack.io/scripts/install.sh | sh -s 0.12.0-rc.1
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Setup K3d&K3s
+        uses: nolar/setup-k3d-k3s@v1
+      - name: Preview
+        id: preview
+        env: 
+          CHANGED_STACKS: ${{ needs.get-changed-project-stack.outputs.changed_stacks }}
+          OSS_ACCESS_KEY_ID: '${{ secrets.OSS_ACCESS_KEY_ID }}'
+          OSS_ACCESS_KEY_SECRET: '${{ secrets.OSS_ACCESS_KEY_SECRET }}'
+          WORKSPACE_FILE_DIR: workspaces
+        run: |
+          # manually source kusion env file
+          source "$HOME/.kusion/.env"
+          # setup remote backend for kusion cli
+          kusion config set backends.oss_test '{"type":"oss","configs":{"bucket":"kusion-test","endpoint":"oss-cn-shanghai.aliyuncs.com"}}'
+          # execute python script for previewing
+          python3 hack/preview_changed_stacks.py
+          
