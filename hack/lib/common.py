@@ -22,6 +22,7 @@ APPLY_CMD = "apply"
 WORKSPACE_CMD = "workspace"
 CREATE_CMD = "create"
 NO_STYLE_FLAG = "--no-style"
+NO_DETAIL_FLAG = "--detail=false"
 YES_FLAG = "--yes"
 FILE_FLAG = "--file"
 
