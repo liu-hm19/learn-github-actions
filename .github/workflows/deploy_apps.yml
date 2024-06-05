@@ -1,0 +1,39 @@
+name: Deploy
+
+on: 
+  push:
+    branches:
+      - "main"
+
+jobs:
+  get-changed-project-stack: 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with: 
+          fetch-depth: 0
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Install Pytest Html
+        run: python3 -m pip install pytest-html pyyaml -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
+      - name: Git Diff
+        id: git-diff
+        uses: technote-space/get-diff-action@v6
+      - name: Get Changed Projects and Stacks
+        id: get-changed-projects-and-stacks
+        env: 
+          CHANGED_PATHS: ${{ steps.git-diff.outputs.diff }}
+        run: |
+          export CHANGED_PATHS="${{ steps.git-diff.outputs.diff }}"
+          python3 hack/get_changed_project_and_stack.py
+      - name: Print Changed Projects and Stacks
+        run: |
+          echo "Changed projects: ${{ steps.get-changed-projects-and-stacks.outputs.changed_projects }}"
+          echo "Changed stacks: ${{ steps.get-changed-projects-and-stacks.outputs.changed_stacks }}"
+    outputs: 
+      changed_projects: ${{ steps.get-changed-projects-and-stacks.outputs.changed_projects }}
+      changed_stacks: ${{ steps.get-changed-projects-and-stacks.outputs.changed_stacks }}
+      
