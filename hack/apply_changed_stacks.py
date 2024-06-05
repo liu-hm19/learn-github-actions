@@ -34,7 +34,7 @@ def apply_stacks(stack_dirs: List[str]) -> bool:
 
 def apply(stack_dir: str):
     print(f"Apply stack {stack_dir}...")
-    cmd = [KUSION_CMD, APPLY_CMD, YES_FLAG, NO_STYLE_FLAG]
+    cmd = [KUSION_CMD, APPLY_CMD, YES_FLAG, NO_STYLE_FLAG, WATCH_FALSE_FLAG]
     process = subprocess.run(
         cmd, capture_output=True, cwd=Path(stack_dir), env=dict(os.environ)
     )

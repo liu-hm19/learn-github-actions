@@ -25,5 +25,6 @@ NO_STYLE_FLAG = "--no-style"
 NO_DETAIL_FLAG = "--detail=false"
 YES_FLAG = "--yes"
 FILE_FLAG = "--file"
+WATCH_FALSE_FLAG = "--watch=false"
 
 IGNORE_PROJECTS = ["example/wordpress"]
