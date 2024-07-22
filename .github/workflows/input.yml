@@ -14,8 +14,6 @@ on:
       use-emoji:
         type: boolean
         description: Include 🎉🤣 emojis
-      environment:
-        type: environment
 
 jobs:
   greet:
@@ -24,3 +22,4 @@ jobs:
     steps:
     - name: Send greeting
       run: echo "${{ github.event.inputs.message }} ${{ fromJSON('["", "🥳"]')[github.event.inputs.use-emoji == 'true'] }} ${{ github.event.inputs.name }}"
+      
