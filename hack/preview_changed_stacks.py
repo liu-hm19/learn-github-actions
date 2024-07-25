@@ -34,7 +34,7 @@ def preview_stacks(stack_dirs: List[str]) -> bool:
 
 def preview(stack_dir: str):
     print(f"Preview stack {stack_dir}...")
-    cmd = [KUSION_CMD, PREVIEW_CMD, NO_STYLE_FLAG, NO_DETAIL_FLAG]
+    cmd = [KUSION_CMD, PREVIEW_CMD, NO_STYLE_FLAG, ALL_DETAIL_FLAG]
     process = subprocess.run(
         cmd, capture_output=True, cwd=Path(stack_dir), env=dict(os.environ)
     )
