@@ -83,6 +83,7 @@ jobs:
             issue-body: "Please check the preview report at: ${{ steps.upload-report.outputs.artifact-url }}"
   
   apply: 
+    needs: [ preview ]
     runs-on: ubuntu-latest
     steps: 
       - name: Checkout Code
